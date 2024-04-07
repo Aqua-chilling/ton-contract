@@ -4,6 +4,7 @@
     "build": "tact --config ./tact.config.json",
     "test": "jest",
     "deploy": "ts-node ./sources/contract.deploy.ts",
+    "deploy-jetton": "ts-node ./sources/jetton.deploy.ts",
     "read": "ts-node ./sources/contract.read.ts",
     "d1": "ts-node ./sources/1_Transfer.ts",
     "d2": "ts-node ./sources/2_TransferURL.ts"

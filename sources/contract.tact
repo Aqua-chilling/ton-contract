@@ -10,18 +10,29 @@ message RemovePack {
     packId: Int;
 }
 
+message Withdraw {
+    amount: Int;
+    contract_jettonWallet: Address;
+}
+
+message UpdateJettonWallet {
+    contract_jettonWallet: Address;
+}
 
 
 contract SampleBuyPack {
-    contract_jettonWallet: Address;
+    contract_jettonWallet: Address?;
     owner: Address;
     content: Cell;
     packages: map<Int, Int>;
 
-    init(owner: Address, content: Cell, contract_jettonWallet: Address) {
-        self.contract_jettonWallet = contract_jettonWallet;
+    init(owner: Address, content: Cell) {
         self.owner = owner;
         self.content = content;
+    }
+
+    receive(update: UpdateJettonWallet) {
+        self.contract_jettonWallet = update.contract_jettonWallet;
     }
 
     receive(pack: CreatePack) {
@@ -40,8 +51,6 @@ contract SampleBuyPack {
 
     // The notification for the Jetton Token contract noification(when current address receive the token will get the notification)
     receive(buyInfo: TokenNotification){
-        require(context().value >= ton("0.1"), "not enough value");
-        // Check the sender is from the Jetton Wallet
         require(context().sender == self.contract_jettonWallet, "not from one of any jetton wallet");
         let buyPackId: Int = buyInfo.forward_payload.loadUint(8);        
         let price: Int = self.packages.get(buyPackId)!!;
@@ -50,5 +59,24 @@ contract SampleBuyPack {
         require(price <= buyInfo.amount, "not enough price");
     
         emit(BoughtPackEvent{ packId: buyPackId, buyer: buyInfo.from }.toCell());
+    }
+
+    receive(withdrawInfo: Withdraw) {
+        send(SendParameters{
+                to: self.contract_jettonWallet!!,
+                value: 0,
+                mode: (SendRemainingValue + SendIgnoreErrors),
+                bounce: false,
+                body: TokenTransfer{
+                    queryId: 0,
+                    amount: withdrawInfo.amount,
+                    destination: context().sender,
+                    response_destination: myAddress(),
+                    custom_payload: null,
+                    forward_ton_amount: ton("0.01"),
+                    forward_payload: emptySlice()
+                }.toCell()
+            }
+        );
     }
 } 
