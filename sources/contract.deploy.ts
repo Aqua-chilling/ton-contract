@@ -27,17 +27,17 @@ dotenv.config();
     let deployer_wallet_contract = client4.open(deployer_wallet);
     let max_supply = toNano(123456766689011); // 🔴 Set the specific total supply in nano
 
-    const buypackParams = {
-        name: "AquaChilling Saler",
-        description: "Testing Aqua Saler Testing contract",
-        symbol: "Seller",
+    const jettonParams = {
+        name: "Test2 Aqua",
+        description: "Testing Aqua Token",
+        symbol: "AQUA",
         image: "https://test.aquachilling.com/logo.svg",
     };
 
-    const jettonParams = {
-        name: "AquaChilling Token",
-        description: "Testing Aqua Token",
-        symbol: "AQUA",
+    const buypackParams = {
+        name: "Test2 Aqua Saler",
+        description: "Testing Aqua Saler Testing contract",
+        symbol: "Seller",
         image: "https://test.aquachilling.com/logo.svg",
     };
 
@@ -78,7 +78,11 @@ dotenv.config();
             packId: 1n,
             full_price: toNano(100),
         })
-    )
+    ).endCell()
+    let msg = beginCell().store(storeUpdateJettonWallet({
+        $$type: "UpdateJettonWallet",
+        contract_jettonWallet: walletMaster
+    }))
     .endCell();
     await deployer_wallet_contract.sendTransfer({
         seqno,
@@ -88,9 +92,9 @@ dotenv.config();
                 to: buyPackAddress,
                 value: deployAmount,
                 init: null,
-                body: packed_msg,
+                body: msg,
             }),
         ],
     });
-    console.log("====== Deployment message sent to =======\n", buyPackAddress);
+    console.log("====== Deployment message sent to =======\n", walletMaster);
 })();

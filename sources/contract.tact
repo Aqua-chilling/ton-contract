@@ -52,7 +52,7 @@ contract SampleBuyPack {
     // The notification for the Jetton Token contract noification(when current address receive the token will get the notification)
     receive(buyInfo: TokenNotification){
         require(context().sender == self.contract_jettonWallet, "not from one of any jetton wallet");
-        let buyPackId: Int = buyInfo.forward_payload.loadUint(8);        
+        let buyPackId: Int = buyInfo.forward_payload.loadUint(1);        
         let price: Int = self.packages.get(buyPackId)!!;
 
         require(price == null, "invalid pack");

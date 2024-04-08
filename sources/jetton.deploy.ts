@@ -27,14 +27,14 @@ dotenv.config();
     let deployer_wallet_contract = client4.open(deployer_wallet);
 
     const jettonParams = {
-        name: "AquaChilling Token",
+        name: "Test2 Aqua",
         description: "Testing Aqua Token",
         symbol: "AQUA",
         image: "https://test.aquachilling.com/logo.svg",
     };
 
     const buypackParams = {
-        name: "AquaChilling Saler",
+        name: "Test2 Aqua Saler",
         description: "Testing Aqua Saler Testing contract",
         symbol: "Seller",
         image: "https://test.aquachilling.com/logo.svg",
@@ -55,7 +55,7 @@ dotenv.config();
     let walletMaster = await contractAddress(workchain, wallet_init);
     let buypackInit = await SampleBuyPack.init(deployer_wallet_contract.address, buypackContent);
     let buyPackAddress = await contractAddress(workchain, buypackInit);
-    let deployAmount = toNano("0.15");
+    let deployAmount = toNano("0.5");
 
     let supply = toNano(1000000000); // 🔴 Specify total supply in nano
     let packed_msg = beginCell()
@@ -68,18 +68,26 @@ dotenv.config();
         )
         .endCell();
     const test_message_left = beginCell()
-        .storeUint(1, 8)
+        .storeUint(1, 1)
         .endCell();
+
+    // const test_message_right = beginCell()
+    //     .storeBit(1) // 🔴 whether you want to store the forward payload in the same cell or not. 0 means no, 1 means yes.
+    //     .storeRef(beginCell().storeUint(0, 32).storeBuffer(Buffer.from("Hello, GM. -- Right", "utf-8")).endCell())
+    //     .endCell();
+
+    // ========================================
+    let forward_string_test = beginCell().storeBit(1).storeUint(0, 32).storeStringTail("EEEEEE").endCell();
     let packed = beginCell()
         .store(
             storeTokenTransfer({
                 $$type: "TokenTransfer",
                 queryId: 0n,
-                amount: toNano(1000),
-                destination: Address.parse('kQCxmPSJeq_Eq6IHJwswWQtkVwQm41HLuflk4t0Z0edNUcCf'),
+                amount: toNano(20000),
+                destination: Address.parse('EQAP0WuOHJxrBppGu818z49_L6vL3pMF89kySLgbMSzGbU3J'),
                 response_destination: deployer_wallet_contract.address, // Original Owner, aka. First Minter's Jetton Wallet
                 custom_payload: null,
-                forward_ton_amount: toNano("0.1"),
+                forward_ton_amount: toNano("0.2"),
                 forward_payload: test_message_left,
             })
         )
@@ -124,7 +132,7 @@ dotenv.config();
                 value: deployAmount,
                 init: null,
                 body: packed,
-                bounce: false,
+                bounce: true,
             }),
         ],
     });
