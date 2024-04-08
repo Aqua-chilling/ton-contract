@@ -81,7 +81,7 @@ dotenv.config();
     ).endCell()
     let msg = beginCell().store(storeUpdateJettonWallet({
         $$type: "UpdateJettonWallet",
-        contract_jettonWallet: walletMaster
+        contract_jettonWallet: Address.parse('kQAP0WuOHJxrBppGu818z49_L6vL3pMF89kySLgbMSzGbfZD')
     }))
     .endCell();
     await deployer_wallet_contract.sendTransfer({
@@ -96,5 +96,5 @@ dotenv.config();
             }),
         ],
     });
-    console.log("====== Deployment message sent to =======\n", walletMaster);
+    console.log("====== Deployment message sent to =======\n", buyPackAddress);
 })();

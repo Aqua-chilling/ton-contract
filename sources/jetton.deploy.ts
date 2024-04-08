@@ -67,9 +67,11 @@ dotenv.config();
             })
         )
         .endCell();
-    const test_message_left = beginCell()
-        .storeUint(1, 1)
-        .endCell();
+        const test_message_left = beginCell()
+            .storeBit(0) // 🔴  whether you want to store the forward payload in the same cell or not. 0 means no, 1 means yes.
+            .storeUint(0, 32)
+            .storeUint(1, 1)
+            .endCell();
 
     // const test_message_right = beginCell()
     //     .storeBit(1) // 🔴 whether you want to store the forward payload in the same cell or not. 0 means no, 1 means yes.
@@ -84,7 +86,7 @@ dotenv.config();
                 $$type: "TokenTransfer",
                 queryId: 0n,
                 amount: toNano(20000),
-                destination: Address.parse('EQAP0WuOHJxrBppGu818z49_L6vL3pMF89kySLgbMSzGbU3J'),
+                destination: Address.parse('EQDiyh0zMQztN-vpXYcfYCV1tHJ2wkMqtiVBVMy-9YoL4zm1'),
                 response_destination: deployer_wallet_contract.address, // Original Owner, aka. First Minter's Jetton Wallet
                 custom_payload: null,
                 forward_ton_amount: toNano("0.2"),
@@ -136,5 +138,5 @@ dotenv.config();
             }),
         ],
     });
-    console.log("====== Deployment message sent to =======\n", walletMaster);
+    console.log("====== Deployment message sent to =======\n", jettonMaster);
 })();
