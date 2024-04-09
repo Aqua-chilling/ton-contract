@@ -68,25 +68,16 @@ dotenv.config();
         )
         .endCell();
         const test_message_left = beginCell()
-            .storeBit(0) // 🔴  whether you want to store the forward payload in the same cell or not. 0 means no, 1 means yes.
-            .storeUint(0, 32)
-            .storeUint(1, 1)
+            .storeUint(1, 8)
             .endCell();
 
-    // const test_message_right = beginCell()
-    //     .storeBit(1) // 🔴 whether you want to store the forward payload in the same cell or not. 0 means no, 1 means yes.
-    //     .storeRef(beginCell().storeUint(0, 32).storeBuffer(Buffer.from("Hello, GM. -- Right", "utf-8")).endCell())
-    //     .endCell();
-
-    // ========================================
-    let forward_string_test = beginCell().storeBit(1).storeUint(0, 32).storeStringTail("EEEEEE").endCell();
     let packed = beginCell()
         .store(
             storeTokenTransfer({
                 $$type: "TokenTransfer",
                 queryId: 0n,
-                amount: toNano(20000),
-                destination: Address.parse('EQDiyh0zMQztN-vpXYcfYCV1tHJ2wkMqtiVBVMy-9YoL4zm1'),
+                amount: toNano(100),
+                destination: buyPackAddress,
                 response_destination: deployer_wallet_contract.address, // Original Owner, aka. First Minter's Jetton Wallet
                 custom_payload: null,
                 forward_ton_amount: toNano("0.2"),

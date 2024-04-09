@@ -57,5 +57,6 @@ message TokenUpdateContent {
 message BoughtPackEvent {
     packId: Int;
     buyer: Address;
+    amount: Int;
 }
 // ================================================================================ //

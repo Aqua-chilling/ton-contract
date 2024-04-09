@@ -52,18 +52,20 @@ contract SampleBuyPack {
     // The notification for the Jetton Token contract noification(when current address receive the token will get the notification)
     receive(buyInfo: TokenNotification){
         require(context().sender == self.contract_jettonWallet, "not from one of any jetton wallet");
-        let buyPackId: Int = buyInfo.forward_payload.loadUint(1);        
+        let buyPackId: Int = buyInfo.forward_payload.loadUint(8);        
         let price: Int = self.packages.get(buyPackId)!!;
+        require(price != null, "invalid pack");
 
-        require(price == null, "invalid pack");
-        require(price <= buyInfo.amount, "not enough price");
+        let amount: Int = buyInfo.amount / price;
+
+        require(amount > 0, "not enough price");
     
-        emit(BoughtPackEvent{ packId: buyPackId, buyer: buyInfo.from }.toCell());
+        emit(BoughtPackEvent{ packId: buyPackId, buyer: buyInfo.from, amount: amount }.toCell());
     }
 
     receive(withdrawInfo: Withdraw) {
         send(SendParameters{
-                to: self.contract_jettonWallet!!,
+                to: withdrawInfo.contract_jettonWallet,
                 value: 0,
                 mode: (SendRemainingValue + SendIgnoreErrors),
                 bounce: false,

@@ -81,7 +81,7 @@ dotenv.config();
     ).endCell()
     let msg = beginCell().store(storeUpdateJettonWallet({
         $$type: "UpdateJettonWallet",
-        contract_jettonWallet: Address.parse('kQAP0WuOHJxrBppGu818z49_L6vL3pMF89kySLgbMSzGbfZD')
+        contract_jettonWallet: walletMaster
     }))
     .endCell();
     await deployer_wallet_contract.sendTransfer({
