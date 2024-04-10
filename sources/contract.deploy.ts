@@ -2,7 +2,7 @@ import { beginCell, contractAddress, toNano, TonClient4, WalletContractV4, inter
 import { mnemonicToPrivateKey } from "ton-crypto";
 import { buildOnchainMetadata } from "./utils/jetton-helpers";
 
-import { SampleBuyPack, storeCreatePack, storeUpdateJettonWallet } from "./output/SampleJetton_SampleBuyPack";
+import { SampleBuyPack, storeBuyPack, storeCreatePack, storeUpdateJettonWallet } from "./output/SampleJetton_SampleBuyPack";
 import { SampleJetton, storeTokenTransfer } from "./output/SampleJetton_SampleJetton";
 
 import { printSeparator } from "./utils/print";
@@ -35,7 +35,7 @@ dotenv.config();
     };
 
     const buypackParams = {
-        name: "Test2 Aqua Saler",
+        name: "Test4 Aqua",
         description: "Testing Aqua Saler Testing contract",
         symbol: "Seller",
         image: "https://test.aquachilling.com/logo.svg",
@@ -76,7 +76,7 @@ dotenv.config();
         storeCreatePack({
             $$type: "CreatePack",
             packId: 1n,
-            full_price: toNano(100),
+            full_price: toNano('0.01'),
         })
     ).endCell()
     let msg = beginCell().store(storeUpdateJettonWallet({
@@ -84,15 +84,24 @@ dotenv.config();
         contract_jettonWallet: walletMaster
     }))
     .endCell();
+    let custom_msg = beginCell().store(
+        storeBuyPack({
+            $$type: "BuyPack",
+            queryId: 1n,
+            packId: 1n,
+            response_destination: deployer_wallet_contract.address,
+        })
+    )
+    .endCell() 
     await deployer_wallet_contract.sendTransfer({
         seqno,
         secretKey,
         messages: [
             internal({
                 to: buyPackAddress,
-                value: deployAmount,
+                value: toNano('0.5'),
                 init: null,
-                body: msg,
+                body: custom_msg,
             }),
         ],
     });

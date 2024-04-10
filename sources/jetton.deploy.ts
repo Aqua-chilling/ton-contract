@@ -70,6 +70,9 @@ dotenv.config();
         const test_message_left = beginCell()
             .storeUint(1, 8)
             .endCell();
+        const test = test_message_left.asSlice().loadUint(8);
+        console.log('payload', test_message_left);
+        console.log('testing', test)
 
     let packed = beginCell()
         .store(
@@ -101,33 +104,33 @@ dotenv.config();
 
     console.log('master:: ', buyPackAddress)
 
-    // await deployer_wallet_contract.sendTransfer({
-    //     seqno,
-    //     secretKey,
-    //     messages: [
-    //         internal({
-    //             to: jettonMaster,
-    //             value: deployAmount,
-    //             init: {
-    //                 code: init.code,
-    //                 data: init.data,
-    //             },
-    //             body: packed_msg,
-    //         }),
-    //     ],
-    // });
     await deployer_wallet_contract.sendTransfer({
         seqno,
         secretKey,
         messages: [
             internal({
-                to: walletMaster,
+                to: jettonMaster,
                 value: deployAmount,
-                init: null,
-                body: packed,
-                bounce: true,
+                init: {
+                    code: init.code,
+                    data: init.data,
+                },
+                body: packed_msg,
             }),
         ],
     });
+    // await deployer_wallet_contract.sendTransfer({
+    //     seqno,
+    //     secretKey,
+    //     messages: [
+    //         internal({
+    //             to: walletMaster,
+    //             value: deployAmount,
+    //             init: null,
+    //             body: packed,
+    //             bounce: true,
+    //         }),
+    //     ],
+    // });
     console.log("====== Deployment message sent to =======\n", jettonMaster);
 })();

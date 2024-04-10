@@ -54,7 +54,8 @@ message TokenUpdateContent {
 }
 
 // ===== LOG Event ===== //
-message BoughtPackEvent {
+message(0x42ede739) BoughtPackEvent {
+    queryId: Int as uint64;
     packId: Int;
     buyer: Address;
     amount: Int;
