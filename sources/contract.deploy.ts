@@ -90,6 +90,7 @@ dotenv.config();
             queryId: 1n,
             packId: 1n,
             response_destination: deployer_wallet_contract.address,
+            amount: 3n,
         })
     )
     .endCell() 
@@ -99,7 +100,7 @@ dotenv.config();
         messages: [
             internal({
                 to: buyPackAddress,
-                value: toNano('0.5'),
+                value: toNano('0.1'),
                 init: null,
                 body: custom_msg,
             }),

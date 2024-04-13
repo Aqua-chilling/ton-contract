@@ -1,0 +1,190 @@
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_bounce_body_mode(slice to, int value, int bounce, cell body, int mode) inline {
+    return (bounce, to, value, mode, body, null(), null());
+}
+
+;;
+;; Type: TokenExcesses
+;; Header: 0xd53276db
+;; TLB: token_excesses#d53276db queryId:uint64 = TokenExcesses
+;;
+
+builder $TokenExcesses$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 3576854235, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $TokenExcesses$_store_cell((int) v) inline {
+    return $TokenExcesses$_store(begin_cell(), v).end_cell();
+}
+
+((int)) $TokenExcesses$_constructor_queryId(int queryId) inline {
+    return (queryId);
+}
+
+;;
+;; Type: BoughtPackEvent
+;; Header: 0x42ede739
+;; TLB: bought_pack_event#42ede739 queryId:uint64 packId:int257 buyer:address amount:int257 = BoughtPackEvent
+;;
+
+builder $BoughtPackEvent$_store(builder build_0, (int, int, slice, int) v) inline {
+    var (v'queryId, v'packId, v'buyer, v'amount) = v;
+    build_0 = store_uint(build_0, 1122887481, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_int(v'packId, 257);
+    build_0 = __tact_store_address(build_0, v'buyer);
+    build_0 = build_0.store_int(v'amount, 257);
+    return build_0;
+}
+
+cell $BoughtPackEvent$_store_cell((int, int, slice, int) v) inline {
+    return $BoughtPackEvent$_store(begin_cell(), v).end_cell();
+}
+
+((int, int, slice, int)) $BoughtPackEvent$_constructor_queryId_packId_buyer_amount(int queryId, int packId, slice buyer, int amount) inline {
+    return (queryId, packId, buyer, amount);
+}
+
+;;
+;; Type: CreatePack
+;; Header: 0x7863db50
+;; TLB: create_pack#7863db50 packId:int257 full_price:coins = CreatePack
+;;
+
+(slice, ((int, int))) $CreatePack$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2019810128);
+    var v'packId = sc_0~load_int(257);
+    var v'full_price = sc_0~load_coins();
+    return (sc_0, (v'packId, v'full_price));
+}
+
+;;
+;; Type: RemovePack
+;; Header: 0xd7b73b27
+;; TLB: remove_pack#d7b73b27 packId:int257 = RemovePack
+;;
+
+(slice, ((int))) $RemovePack$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3619109671);
+    var v'packId = sc_0~load_int(257);
+    return (sc_0, (v'packId));
+}
+
+;;
+;; Type: WithdrawTon
+;; Header: 0xfabed8e6
+;; TLB: withdraw_ton#fabed8e6 amount:coins = WithdrawTon
+;;
+
+(slice, ((int))) $WithdrawTon$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 4206811366);
+    var v'amount = sc_0~load_coins();
+    return (sc_0, (v'amount));
+}
+
+;;
+;; Type: UpdateJettonWallet
+;; Header: 0x8bfebb71
+;; TLB: update_jetton_wallet#8bfebb71 contract_jettonWallet:address = UpdateJettonWallet
+;;
+
+(slice, ((slice))) $UpdateJettonWallet$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2348727153);
+    var v'contract_jettonWallet = sc_0~__tact_load_address();
+    return (sc_0, (v'contract_jettonWallet));
+}
+
+;;
+;; Type: BuyPack
+;; Header: 0xe57f6e6e
+;; TLB: buy_pack#e57f6e6e queryId:uint64 packId:int257 response_destination:Maybe address amount:int257 = BuyPack
+;;
+
+(slice, ((int, int, slice, int))) $BuyPack$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3850333806);
+    var v'queryId = sc_0~load_uint(64);
+    var v'packId = sc_0~load_int(257);
+    var v'response_destination = sc_0~__tact_load_address_opt();
+    var v'amount = sc_0~load_int(257);
+    return (sc_0, (v'queryId, v'packId, v'response_destination, v'amount));
+}
+
+;;
+;; Type: WithdrawnTon
+;; Header: 0x1704739e
+;; TLB: withdrawn_ton#1704739e amount:coins = WithdrawnTon
+;;
+
+builder $WithdrawnTon$_store(builder build_0, (int) v) inline {
+    var (v'amount) = v;
+    build_0 = store_uint(build_0, 386167710, 32);
+    build_0 = build_0.store_coins(v'amount);
+    return build_0;
+}
+
+cell $WithdrawnTon$_store_cell((int) v) inline {
+    return $WithdrawnTon$_store(begin_cell(), v).end_cell();
+}
+
+((int)) $WithdrawnTon$_constructor_amount(int amount) inline {
+    return (amount);
+}
+
+;;
+;; Type: SampleBuyPack
+;;
+
+builder $SampleBuyPack$_store(builder build_0, (slice, slice, cell, cell, int) v) inline {
+    var (v'contract_jettonWallet, v'owner, v'content, v'packages, v'totalBought) = v;
+    build_0 = __tact_store_address_opt(build_0, v'contract_jettonWallet);
+    build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = build_0.store_ref(v'content);
+    build_0 = build_0.store_dict(v'packages);
+    build_0 = build_0.store_coins(v'totalBought);
+    return build_0;
+}
+
+(slice, ((slice, slice, cell, cell, int))) $SampleBuyPack$_load(slice sc_0) inline {
+    var v'contract_jettonWallet = sc_0~__tact_load_address_opt();
+    var v'owner = sc_0~__tact_load_address();
+    var v'content = sc_0~load_ref();
+    var v'packages = sc_0~load_dict();
+    var v'totalBought = sc_0~load_coins();
+    return (sc_0, (v'contract_jettonWallet, v'owner, v'content, v'packages, v'totalBought));
+}
+
+(slice, ((slice, cell))) $SampleBuyPack$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'content = sc_0~load_ref();
+    return (sc_0, (v'owner, v'content));
+}
+
+(slice, slice, cell, cell, int) $SampleBuyPack$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$SampleBuyPack$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (slice owner, cell content) = $sc~$SampleBuyPack$init$_load();
+        $sc.end_parse();
+        return $SampleBuyPack$_contract_init(owner, content);
+    }
+}
+
+() $SampleBuyPack$_contract_store((slice, slice, cell, cell, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $SampleBuyPack$_store(b, v);
+    set_data(b.end_cell());
+}

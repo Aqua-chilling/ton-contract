@@ -1,0 +1,191 @@
+#pragma version =0.4.3;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "SampleJetton_SampleBuyPack.headers.fc";
+#include "SampleJetton_SampleBuyPack.stdlib.fc";
+#include "SampleJetton_SampleBuyPack.storage.fc";
+
+;;
+;; Contract SampleBuyPack functions
+;;
+
+(slice, slice, cell, cell, int) $SampleBuyPack$_contract_init(slice $owner, cell $content) impure inline_ref {
+    var (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought)) = (null(), null(), null(), null(), null());
+    $self'owner = $owner;
+    $self'content = $content;
+    $self'totalBought = 0;
+    return ($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought);
+}
+
+((slice, slice, cell, cell, int), int) $SampleBuyPack$_fun_msgValue((slice, slice, cell, cell, int) $self, int $value) impure inline_ref {
+    var (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought)) = $self;
+    int $msgValue = $value;
+    int $tonBalanceBeforeMsg = ((__tact_my_balance() - $msgValue) - $self'totalBought);
+    int $storageFee = (10000000 - min($tonBalanceBeforeMsg, 10000000));
+    $msgValue = ($msgValue - ($storageFee + 10000000));
+    return (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought), $msgValue);
+}
+
+;;
+;; Receivers of a Contract SampleBuyPack
+;;
+
+(((slice, slice, cell, cell, int)), ()) $SampleBuyPack$_internal_binary_UpdateJettonWallet((slice, slice, cell, cell, int) $self, (slice) $update) impure inline {
+    var ($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought) = $self;
+    var ($update'contract_jettonWallet) = $update;
+    $self'contract_jettonWallet = $update'contract_jettonWallet;
+    return (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought), ());
+}
+
+(((slice, slice, cell, cell, int)), ()) $SampleBuyPack$_internal_binary_CreatePack((slice, slice, cell, cell, int) $self, (int, int) $pack) impure inline {
+    var ($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought) = $self;
+    var ($pack'packId, $pack'full_price) = $pack;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(14534, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
+    $self'packages~__tact_dict_set_int_int(257, $pack'packId, $pack'full_price, 257);
+    return (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought), ());
+}
+
+(((slice, slice, cell, cell, int)), ()) $SampleBuyPack$_internal_binary_RemovePack((slice, slice, cell, cell, int) $self, (int) $pack) impure inline {
+    var ($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought) = $self;
+    var ($pack'packId) = $pack;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(14534, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
+    $self'packages~__tact_dict_set_int_int(257, $pack'packId, null(), 257);
+    return (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought), ());
+}
+
+(((slice, slice, cell, cell, int)), ()) $SampleBuyPack$_internal_binary_BuyPack((slice, slice, cell, cell, int) $self, (int, int, slice, int) $buyInfo) impure inline {
+    var ($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought) = $self;
+    var ($buyInfo'queryId, $buyInfo'packId, $buyInfo'response_destination, $buyInfo'amount) = $buyInfo;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $buyPackId = $buyInfo'packId;
+    int $price = __tact_not_null(__tact_dict_get_int_int($self'packages, 257, $buyPackId, 257));
+    throw_unless(41385, null?($self'contract_jettonWallet));
+    throw_unless(11439, (~ null?($price)));
+    int $msgValue = ($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought)~$SampleBuyPack$_fun_msgValue($ctx'value);
+    int $amount = $buyInfo'amount;
+    throw_unless(50669, (($amount * $price) <= $msgValue));
+    $msgValue = ($msgValue - ($price * $amount));
+    if ((~ null?($buyInfo'response_destination))) {
+        $global_send($SendParameters$_constructor_to_value_bounce_body_mode(__tact_not_null($buyInfo'response_destination), $msgValue, false, $TokenExcesses$_store_cell($TokenExcesses$_constructor_queryId($buyInfo'queryId)), 2));
+    }
+    $self'totalBought = ($self'totalBought + ($price * $amount));
+    $global_emit($BoughtPackEvent$_store_cell($BoughtPackEvent$_constructor_queryId_packId_buyer_amount($buyInfo'queryId, $buyInfo'packId, $ctx'sender, $amount)));
+    return (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought), ());
+}
+
+(((slice, slice, cell, cell, int)), ()) $SampleBuyPack$_internal_binary_WithdrawTon((slice, slice, cell, cell, int) $self, (int) $withdrawInfo) impure inline {
+    var ($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought) = $self;
+    var ($withdrawInfo'amount) = $withdrawInfo;
+    $self'totalBought = ($self'totalBought - $withdrawInfo'amount);
+    $global_send($SendParameters$_constructor_to_value_bounce_body_mode($self'owner, $withdrawInfo'amount, false, $WithdrawnTon$_store_cell($WithdrawnTon$_constructor_amount($withdrawInfo'amount)), 2));
+    return (($self'contract_jettonWallet, $self'owner, $self'content, $self'packages, $self'totalBought), ());
+}
+
+;;
+;; Get methods of a Contract SampleBuyPack
+;;
+
+_ %msgValue(int $$value) method_id(115218) {
+    int $value = $$value;
+    var self = $SampleBuyPack$_contract_load();
+    var res = self~$SampleBuyPack$_fun_msgValue($value);
+    return res;
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://QmdS74R5xexFpXNwDVxvm8KgKhfWjtvNUebm3DwjdAFSYh";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract SampleBuyPack
+;;
+
+((slice, slice, cell, cell, int), int) $SampleBuyPack$_contract_router_internal((slice, slice, cell, cell, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive UpdateJettonWallet message
+    if (op == 2348727153) {
+        var msg = in_msg~$UpdateJettonWallet$_load();
+        self~$SampleBuyPack$_internal_binary_UpdateJettonWallet(msg);
+        return (self, true);
+    }
+    
+    ;; Receive CreatePack message
+    if (op == 2019810128) {
+        var msg = in_msg~$CreatePack$_load();
+        self~$SampleBuyPack$_internal_binary_CreatePack(msg);
+        return (self, true);
+    }
+    
+    ;; Receive RemovePack message
+    if (op == 3619109671) {
+        var msg = in_msg~$RemovePack$_load();
+        self~$SampleBuyPack$_internal_binary_RemovePack(msg);
+        return (self, true);
+    }
+    
+    ;; Receive BuyPack message
+    if (op == 3850333806) {
+        var msg = in_msg~$BuyPack$_load();
+        self~$SampleBuyPack$_internal_binary_BuyPack(msg);
+        return (self, true);
+    }
+    
+    ;; Receive WithdrawTon message
+    if (op == 4206811366) {
+        var msg = in_msg~$WithdrawTon$_load();
+        self~$SampleBuyPack$_internal_binary_WithdrawTon(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $SampleBuyPack$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$SampleBuyPack$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $SampleBuyPack$_contract_store(self);
+}
