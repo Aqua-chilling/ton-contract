@@ -1,0 +1,134 @@
+#pragma version =0.4.3;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "SampleClaim_SampleClaimContract.headers.fc";
+#include "SampleClaim_SampleClaimContract.stdlib.fc";
+#include "SampleClaim_SampleClaimContract.storage.fc";
+
+;;
+;; Contract SampleClaimContract functions
+;;
+
+(slice, slice, int, int, cell) $SampleClaimContract$_contract_init(slice $owner, int $public_key) impure inline_ref {
+    var (($self'contract_jettonWallet, $self'owner, $self'public_key, $self'ENTERED, $self'claimedIds)) = (null(), null(), null(), null(), null());
+    $self'owner = $owner;
+    $self'public_key = $public_key;
+    $self'ENTERED = false;
+    return ($self'contract_jettonWallet, $self'owner, $self'public_key, $self'ENTERED, $self'claimedIds);
+}
+
+;;
+;; Receivers of a Contract SampleClaimContract
+;;
+
+(((slice, slice, int, int, cell)), ()) $SampleClaimContract$_internal_binary_UpdateJetton((slice, slice, int, int, cell) $self, (slice) $info) impure inline {
+    var ($self'contract_jettonWallet, $self'owner, $self'public_key, $self'ENTERED, $self'claimedIds) = $self;
+    var ($info'contract_jettonWallet) = $info;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(14534, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
+    $self'contract_jettonWallet = $info'contract_jettonWallet;
+    return (($self'contract_jettonWallet, $self'owner, $self'public_key, $self'ENTERED, $self'claimedIds), ());
+}
+
+(((slice, slice, int, int, cell)), ()) $SampleClaimContract$_internal_binary_ClaimInfo((slice, slice, int, int, cell) $self, (slice, slice) $info) impure inline {
+    var ($self'contract_jettonWallet, $self'owner, $self'public_key, $self'ENTERED, $self'claimedIds) = $self;
+    var ($info'data, $info'signature) = $info;
+    throw_unless(39170, (~ $self'ENTERED));
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    slice $data = $info'data;
+    int $claimId = $data~load_uint(256);
+    int $amount = $data~load_uint(256);
+    slice $receiver = $data~__tact_load_address();
+    slice $signature = $info'signature;
+    slice $sliceHash = $Cell$_fun_asSlice(end_cell(__tact_store_address(store_uint(store_uint(begin_cell(), $claimId, 256), $amount, 256), $receiver)));
+    int $isClaimed = __tact_dict_get_int_int($self'claimedIds, 257, $claimId, 1);
+    throw_unless(26458, null?($isClaimed));
+    $self'ENTERED = true;
+    throw_unless(31680, ( __tact_slice_eq_bits($ctx'sender, $receiver) ));
+    int $isValid = check_signature(slice_hash($sliceHash), $signature~load_bits(512), $self'public_key);
+    throw_unless(8120, $isValid);
+    $global_send($SendParameters$_constructor_to_value_mode_bounce_body(__tact_not_null($self'contract_jettonWallet), 0, 64, false, $TokenTransfer$_store_cell($TokenTransfer$_constructor_queryId_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(0, $amount, $Context$_get_sender(__tact_context_get()), $receiver, null(), 0, $global_emptySlice()))));
+    $self'claimedIds~__tact_dict_set_int_int(257, $claimId, true, 1);
+    $self'ENTERED = false;
+    $global_emit($ClaimEvent$_store_cell($ClaimEvent$_constructor_claimId_amount($claimId, $amount)));
+    return (($self'contract_jettonWallet, $self'owner, $self'public_key, $self'ENTERED, $self'claimedIds), ());
+}
+
+;;
+;; Get methods of a Contract SampleClaimContract
+;;
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://Qmf4fBCx43QyH3kfMpzndk23Kv3Kgz8Z6y6PfniP4x9TB5";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract SampleClaimContract
+;;
+
+((slice, slice, int, int, cell), int) $SampleClaimContract$_contract_router_internal((slice, slice, int, int, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive UpdateJetton message
+    if (op == 2348727153) {
+        var msg = in_msg~$UpdateJetton$_load();
+        self~$SampleClaimContract$_internal_binary_UpdateJetton(msg);
+        return (self, true);
+    }
+    
+    ;; Receive ClaimInfo message
+    if (op == 2872424057) {
+        var msg = in_msg~$ClaimInfo$_load();
+        self~$SampleClaimContract$_internal_binary_ClaimInfo(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $SampleClaimContract$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$SampleClaimContract$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $SampleClaimContract$_contract_store(self);
+}

@@ -6,5 +6,12 @@
         "options":{
             
         }
+    }, {
+        "name": "SampleClaim",
+        "path": "./sources/claim.tact",
+        "output": "./sources/output",
+        "options":{
+            
+        }
     }]
 }

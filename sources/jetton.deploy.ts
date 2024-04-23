@@ -102,7 +102,7 @@ dotenv.config();
     console.log("Minting:: ", fromNano(supply));
     printSeparator();
 
-    console.log('master:: ', buyPackAddress)
+    console.log('master:: ', jettonMaster)
 
     await deployer_wallet_contract.sendTransfer({
         seqno,

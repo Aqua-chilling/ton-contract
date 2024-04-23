@@ -3,7 +3,7 @@ Contract: SampleBuyPack
 BOC Size: 1354 bytes
 
 # Types
-Total Types: 23
+Total Types: 24
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -60,6 +60,10 @@ Signature: `TokenUpdateContent{content:^cell}`
 ## BoughtPackEvent
 TLB: `bought_pack_event#42ede739 queryId:uint64 packId:int257 buyer:address amount:int257 = BoughtPackEvent`
 Signature: `BoughtPackEvent{queryId:uint64,packId:int257,buyer:address,amount:int257}`
+
+## ClaimEvent
+TLB: `claim_event#0f2a7e05 claimId:uint256 amount:coins = ClaimEvent`
+Signature: `ClaimEvent{claimId:uint256,amount:coins}`
 
 ## ChangeOwner
 TLB: `change_owner#819dbe99 queryId:uint64 newOwner:address = ChangeOwner`

@@ -60,4 +60,9 @@ message(0x42ede739) BoughtPackEvent {
     buyer: Address;
     amount: Int;
 }
+
+message(0x0f2a7e05) ClaimEvent {
+    claimId: Int as uint256;
+    amount: Int as coins;
+}
 // ================================================================================ //

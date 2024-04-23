@@ -8,6 +8,7 @@ import { SampleJetton, storeTokenTransfer } from "./output/SampleJetton_SampleJe
 import { printSeparator } from "./utils/print";
 import * as dotenv from "dotenv";
 import { JettonDefaultWallet } from "./output/SampleJetton_JettonDefaultWallet";
+import * as nacl from 'ton-crypto'
 dotenv.config();
 
 (async () => {
@@ -22,6 +23,7 @@ dotenv.config();
     let secretKey = keyPair.secretKey;
     let workchain = 0; //we are working in basechain.
     let deployer_wallet = WalletContractV4.create({ workchain, publicKey: keyPair.publicKey });
+    console.log('keypair', keyPair.publicKey.toString())
     console.log(deployer_wallet.address);
 
     let deployer_wallet_contract = client4.open(deployer_wallet);
@@ -84,27 +86,30 @@ dotenv.config();
         contract_jettonWallet: walletMaster
     }))
     .endCell();
-    let custom_msg = beginCell().store(
-        storeBuyPack({
-            $$type: "BuyPack",
-            queryId: 1n,
-            packId: 1n,
-            response_destination: deployer_wallet_contract.address,
-            amount: 3n,
-        })
-    )
-    .endCell() 
-    await deployer_wallet_contract.sendTransfer({
-        seqno,
-        secretKey,
-        messages: [
-            internal({
-                to: buyPackAddress,
-                value: toNano('0.1'),
-                init: null,
-                body: custom_msg,
-            }),
-        ],
-    });
-    console.log("====== Deployment message sent to =======\n", buyPackAddress);
+
+    
+    // let custom_msg = beginCell().store(
+    //     storeBuyPack({
+    //         $$type: "BuyPack",
+    //         queryId: 1n,
+    //         packId: 1n,
+    //         response_destination: deployer_wallet_contract.address,
+    //         amount: 3n,
+    //     })
+    // )
+    // .endCell() 
+    
+    // await deployer_wallet_contract.sendTransfer({
+    //     seqno,
+    //     secretKey,
+    //     messages: [
+    //         internal({
+    //             to: buyPackAddress,
+    //             value: toNano('0.1'),
+    //             init: null,
+    //             body: custom_msg,
+    //         }),
+    //     ],
+    // });
+    // console.log("====== Deployment message sent to =======\n", buyPackAddress);
 })();
