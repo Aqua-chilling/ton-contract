@@ -1,0 +1,93 @@
+;;
+;; Type: DepositData
+;; Header: 0xcb75b312
+;; TLB: deposit_data#cb75b312 queryId:uint256 response_destination:Maybe address receiver:address = DepositData
+;;
+
+(slice, ((int, slice, slice))) $DepositData$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3413488402);
+    var v'queryId = sc_0~load_uint(256);
+    var v'response_destination = sc_0~__tact_load_address_opt();
+    var v'receiver = sc_0~__tact_load_address();
+    return (sc_0, (v'queryId, v'response_destination, v'receiver));
+}
+
+;;
+;; Type: DepositedEvent
+;; Header: 0xac32a321
+;; TLB: deposited_event#ac32a321 queryId:uint256 amount:coins receiver:address = DepositedEvent
+;;
+
+builder $DepositedEvent$_store(builder build_0, (int, int, slice) v) inline {
+    var (v'queryId, v'amount, v'receiver) = v;
+    build_0 = store_uint(build_0, 2888999713, 32);
+    build_0 = build_0.store_uint(v'queryId, 256);
+    build_0 = build_0.store_coins(v'amount);
+    build_0 = __tact_store_address(build_0, v'receiver);
+    return build_0;
+}
+
+cell $DepositedEvent$_store_cell((int, int, slice) v) inline {
+    return $DepositedEvent$_store(begin_cell(), v).end_cell();
+}
+
+((int, int, slice)) $DepositedEvent$_constructor_queryId_amount_receiver(int queryId, int amount, slice receiver) inline {
+    return (queryId, amount, receiver);
+}
+
+;;
+;; Type: UpdatePause
+;; Header: 0x0234ca2d
+;; TLB: update_pause#0234ca2d paused:bool = UpdatePause
+;;
+
+(slice, ((int))) $UpdatePause$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 37014061);
+    var v'paused = sc_0~load_int(1);
+    return (sc_0, (v'paused));
+}
+
+;;
+;; Type: SampleBridgeContract
+;;
+
+builder $SampleBridgeContract$_store(builder build_0, (slice, int) v) inline {
+    var (v'owner, v'paused) = v;
+    build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = build_0.store_int(v'paused, 1);
+    return build_0;
+}
+
+(slice, ((slice, int))) $SampleBridgeContract$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'paused = sc_0~load_int(1);
+    return (sc_0, (v'owner, v'paused));
+}
+
+(slice, ((slice))) $SampleBridgeContract$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    return (sc_0, (v'owner));
+}
+
+(slice, int) $SampleBridgeContract$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$SampleBridgeContract$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (slice owner) = $sc~$SampleBridgeContract$init$_load();
+        $sc.end_parse();
+        return $SampleBridgeContract$_contract_init(owner);
+    }
+}
+
+() $SampleBridgeContract$_contract_store((slice, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $SampleBridgeContract$_store(b, v);
+    set_data(b.end_cell());
+}

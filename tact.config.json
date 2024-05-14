@@ -13,5 +13,12 @@
         "options":{
             
         }
+    }, {
+        "name": "SampleBridge",
+        "path": "./sources/bridge.tact",
+        "output": "./sources/output",
+        "options":{
+            
+        }
     }]
 }
