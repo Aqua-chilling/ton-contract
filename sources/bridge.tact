@@ -39,6 +39,8 @@ contract SampleBridgeContract {
         let ctx: Context = context();
         let msgValue: Int = self.msg_value(ctx.value);
 
+        require(!self.paused, "paused");
+
         require(msgValue > 0, "invalid ton");
 
         emit(DepositedEvent{ queryId: info.queryId, amount: msgValue, receiver: info.receiver }.toCell());
