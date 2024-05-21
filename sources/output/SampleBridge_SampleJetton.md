@@ -3,7 +3,7 @@ Contract: SampleJetton
 BOC Size: 1744 bytes
 
 # Types
-Total Types: 20
+Total Types: 21
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -74,8 +74,8 @@ TLB: `change_owner_ok#327b2b4a queryId:uint64 newOwner:address = ChangeOwnerOk`
 Signature: `ChangeOwnerOk{queryId:uint64,newOwner:address}`
 
 ## DepositData
-TLB: `deposit_data#cb75b312 queryId:uint256 response_destination:Maybe address receiver:address = DepositData`
-Signature: `DepositData{queryId:uint256,response_destination:Maybe address,receiver:address}`
+TLB: `deposit_data#cb75b312 queryId:uint256 receiver:address = DepositData`
+Signature: `DepositData{queryId:uint256,receiver:address}`
 
 ## DepositedEvent
 TLB: `deposited_event#ac32a321 queryId:uint256 amount:coins receiver:address = DepositedEvent`
@@ -84,6 +84,10 @@ Signature: `DepositedEvent{queryId:uint256,amount:coins,receiver:address}`
 ## UpdatePause
 TLB: `update_pause#0234ca2d paused:bool = UpdatePause`
 Signature: `UpdatePause{paused:bool}`
+
+## WithdrawTon
+TLB: `withdraw_ton#fabed8e6 amount:coins = WithdrawTon`
+Signature: `WithdrawTon{amount:coins}`
 
 # Get Methods
 Total Get Methods: 3
@@ -126,6 +130,7 @@ Argument: owner
 6898: The total supply will be overlapping.
 14534: Not owner
 18668: Can't Mint Anymore
+41067: paused
 42708: Invalid sender!
 43422: Invalid value - Burn
 55512: invalid ton

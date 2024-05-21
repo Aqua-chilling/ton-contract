@@ -11,7 +11,7 @@ message(0x8bfebb71) UpdateJetton {
     contract_jettonWallet: Address;
 }
 
-contract SampleClaimContract {
+contract ClaimContract {
     const minTonsForStorage: Int = ton("0.01");
     const gasConsumption: Int = ton("0.01");
 

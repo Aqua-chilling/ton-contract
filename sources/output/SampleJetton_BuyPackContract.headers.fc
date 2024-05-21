@@ -1,0 +1,106 @@
+;;
+;; Header files for BuyPackContract
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_verify_address
+slice __tact_verify_address(slice address) inline;
+
+;; __tact_load_address
+(slice, slice) __tact_load_address(slice cs) inline;
+
+;; __tact_load_address_opt
+(slice, slice) __tact_load_address_opt(slice cs) inline;
+
+;; __tact_store_address
+builder __tact_store_address(builder b, slice address) inline;
+
+;; __tact_my_balance
+int __tact_my_balance() inline;
+
+;; __tact_not_null
+forall X -> X __tact_not_null(X x) inline;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_store_bool
+builder __tact_store_bool(builder b, int v) inline;
+
+;; __tact_dict_set_int_int
+(cell, ()) __tact_dict_set_int_int(cell d, int kl, int k, int v, int vl) inline;
+
+;; __tact_dict_get_int_int
+int __tact_dict_get_int_int(cell d, int kl, int k, int vl) inline;
+
+;; __tact_slice_eq_bits
+int __tact_slice_eq_bits(slice a, slice b) inline;
+
+;; $TokenExcesses$_store
+builder $TokenExcesses$_store(builder build_0, (int) v) inline;
+
+;; $TokenExcesses$_store_cell
+cell $TokenExcesses$_store_cell((int) v) inline;
+
+;; $BoughtPackEvent$_store
+builder $BoughtPackEvent$_store(builder build_0, (int, int, slice, int) v) inline;
+
+;; $BoughtPackEvent$_store_cell
+cell $BoughtPackEvent$_store_cell((int, int, slice, int) v) inline;
+
+;; $CreatePack$_load
+(slice, ((int, int))) $CreatePack$_load(slice sc_0) inline;
+
+;; $RemovePack$_load
+(slice, ((int))) $RemovePack$_load(slice sc_0) inline;
+
+;; $WithdrawTon$_load
+(slice, ((int))) $WithdrawTon$_load(slice sc_0) inline;
+
+;; $BuyPack$_load
+(slice, ((int, int, slice, int))) $BuyPack$_load(slice sc_0) inline;
+
+;; $WithdrawnTon$_store
+builder $WithdrawnTon$_store(builder build_0, (int) v) inline;
+
+;; $WithdrawnTon$_store_cell
+cell $WithdrawnTon$_store_cell((int) v) inline;
+
+;; $BuyPackContract$_store
+builder $BuyPackContract$_store(builder build_0, (slice, cell, int) v) inline;
+
+;; $BuyPackContract$_load
+(slice, ((slice, cell, int))) $BuyPackContract$_load(slice sc_0) inline;
+
+;; $BuyPackContract$init$_load
+(slice, ((slice))) $BuyPackContract$init$_load(slice sc_0) inline;
+
+;; $BuyPackContract$_contract_init
+(slice, cell, int) $BuyPackContract$_contract_init(slice $owner) impure inline_ref;
+
+;; $BuyPackContract$_contract_load
+(slice, cell, int) $BuyPackContract$_contract_load() impure inline_ref;
+
+;; $BuyPackContract$_contract_store
+() $BuyPackContract$_contract_store((slice, cell, int) v) impure inline;
+
+;; $global_send
+() $global_send((int, slice, int, int, cell, cell, cell) $params) impure inline_ref;
+
+;; $global_emit
+() $global_emit(cell $body) impure inline;
+
+;; $BuyPackContract$_fun_msgValue
+((slice, cell, int), int) $BuyPackContract$_fun_msgValue((slice, cell, int) $self, int $value) impure inline_ref;
+
+;; $SendParameters$_constructor_to_value_bounce_body_mode
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_bounce_body_mode(slice to, int value, int bounce, cell body, int mode) inline;
+
+;; $TokenExcesses$_constructor_queryId
+((int)) $TokenExcesses$_constructor_queryId(int queryId) inline;
+
+;; $BoughtPackEvent$_constructor_queryId_packId_buyer_amount
+((int, int, slice, int)) $BoughtPackEvent$_constructor_queryId_packId_buyer_amount(int queryId, int packId, slice buyer, int amount) inline;
+
+;; $WithdrawnTon$_constructor_amount
+((int)) $WithdrawnTon$_constructor_amount(int amount) inline;

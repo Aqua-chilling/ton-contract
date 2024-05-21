@@ -1,0 +1,150 @@
+#pragma version =0.4.3;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "SampleBridge_BridgeContract.headers.fc";
+#include "SampleBridge_BridgeContract.stdlib.fc";
+#include "SampleBridge_BridgeContract.storage.fc";
+
+;;
+;; Contract BridgeContract functions
+;;
+
+(slice, int) $BridgeContract$_contract_init(slice $owner) impure inline_ref {
+    var (($self'owner, $self'paused)) = (null(), null());
+    $self'owner = $owner;
+    $self'paused = false;
+    return ($self'owner, $self'paused);
+}
+
+((slice, int), int) $BridgeContract$_fun_msg_value((slice, int) $self, int $value) impure inline_ref {
+    var (($self'owner, $self'paused)) = $self;
+    int $msg_value = $value;
+    int $ton_balance_before_msg = (__tact_my_balance() - $msg_value);
+    int $storage_fee = (10000000 - min($ton_balance_before_msg, 10000000));
+    $msg_value = ($msg_value - ($storage_fee + 10000000));
+    return (($self'owner, $self'paused), $msg_value);
+}
+
+;;
+;; Receivers of a Contract BridgeContract
+;;
+
+(((slice, int)), ()) $BridgeContract$_internal_binary_UpdatePause((slice, int) $self, (int) $info) impure inline {
+    var ($self'owner, $self'paused) = $self;
+    var ($info'paused) = $info;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(14534, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
+    $self'paused = $info'paused;
+    return (($self'owner, $self'paused), ());
+}
+
+(((slice, int)), ()) $BridgeContract$_internal_binary_DepositData((slice, int) $self, (int, slice) $info) impure inline {
+    var ($self'owner, $self'paused) = $self;
+    var ($info'queryId, $info'receiver) = $info;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = ($self'owner, $self'paused)~$BridgeContract$_fun_msg_value($ctx'value);
+    throw_unless(41067, (~ $self'paused));
+    throw_unless(55512, ($msgValue > 0));
+    $global_emit($DepositedEvent$_store_cell($DepositedEvent$_constructor_queryId_amount_receiver($info'queryId, $msgValue, $info'receiver)));
+    return (($self'owner, $self'paused), ());
+}
+
+(((slice, int)), ()) $BridgeContract$_internal_binary_WithdrawTon((slice, int) $self, (int) $withdrawInfo) impure inline {
+    var ($self'owner, $self'paused) = $self;
+    var ($withdrawInfo'amount) = $withdrawInfo;
+    $global_send($SendParameters$_constructor_to_value_bounce_body_mode($self'owner, $withdrawInfo'amount, false, null(), 2));
+    return (($self'owner, $self'paused), ());
+}
+
+;;
+;; Get methods of a Contract BridgeContract
+;;
+
+_ %msg_value(int $$value) method_id(72550) {
+    int $value = $$value;
+    var self = $BridgeContract$_contract_load();
+    var res = self~$BridgeContract$_fun_msg_value($value);
+    return res;
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://QmVAJCR2r4F1VpihLyArqoUFGutY5jaRwnsWJ3MbfwX29r";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract BridgeContract
+;;
+
+((slice, int), int) $BridgeContract$_contract_router_internal((slice, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive UpdatePause message
+    if (op == 37014061) {
+        var msg = in_msg~$UpdatePause$_load();
+        self~$BridgeContract$_internal_binary_UpdatePause(msg);
+        return (self, true);
+    }
+    
+    ;; Receive DepositData message
+    if (op == 3413488402) {
+        var msg = in_msg~$DepositData$_load();
+        self~$BridgeContract$_internal_binary_DepositData(msg);
+        return (self, true);
+    }
+    
+    ;; Receive WithdrawTon message
+    if (op == 4206811366) {
+        var msg = in_msg~$WithdrawTon$_load();
+        self~$BridgeContract$_internal_binary_WithdrawTon(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $BridgeContract$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$BridgeContract$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $BridgeContract$_contract_store(self);
+}

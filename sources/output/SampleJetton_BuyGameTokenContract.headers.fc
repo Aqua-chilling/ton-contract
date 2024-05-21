@@ -1,0 +1,58 @@
+;;
+;; Header files for BuyGameTokenContract
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_verify_address
+slice __tact_verify_address(slice address) inline;
+
+;; __tact_load_address
+(slice, slice) __tact_load_address(slice cs) inline;
+
+;; __tact_store_address
+builder __tact_store_address(builder b, slice address) inline;
+
+;; __tact_my_balance
+int __tact_my_balance() inline;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; $DepositEvent$_store
+builder $DepositEvent$_store(builder build_0, (int, int, slice) v) inline;
+
+;; $DepositEvent$_store_cell
+cell $DepositEvent$_store_cell((int, int, slice) v) inline;
+
+;; $DepositInfo$_load
+(slice, ((slice, slice))) $DepositInfo$_load(slice sc_0) inline;
+
+;; $BuyGameTokenContract$_store
+builder $BuyGameTokenContract$_store(builder build_0, (slice, int) v) inline;
+
+;; $BuyGameTokenContract$_load
+(slice, ((slice, int))) $BuyGameTokenContract$_load(slice sc_0) inline;
+
+;; $BuyGameTokenContract$init$_load
+(slice, ((slice, int))) $BuyGameTokenContract$init$_load(slice sc_0) inline;
+
+;; $BuyGameTokenContract$_contract_init
+(slice, int) $BuyGameTokenContract$_contract_init(slice $owner, int $public_key) impure inline_ref;
+
+;; $BuyGameTokenContract$_contract_load
+(slice, int) $BuyGameTokenContract$_contract_load() impure inline_ref;
+
+;; $BuyGameTokenContract$_contract_store
+() $BuyGameTokenContract$_contract_store((slice, int) v) impure inline;
+
+;; $global_emit
+() $global_emit(cell $body) impure inline;
+
+;; $Cell$_fun_asSlice
+slice $Cell$_fun_asSlice(cell $self) impure inline;
+
+;; $BuyGameTokenContract$_fun_msg_value
+((slice, int), int) $BuyGameTokenContract$_fun_msg_value((slice, int) $self, int $value) impure inline_ref;
+
+;; $DepositEvent$_constructor_amountInTon_amountInGame_receiver
+((int, int, slice)) $DepositEvent$_constructor_amountInTon_amountInGame_receiver(int amountInTon, int amountInGame, slice receiver) inline;

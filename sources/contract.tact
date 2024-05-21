@@ -34,25 +34,19 @@ message WithdrawnTon {
     amount: Int as coins;
 }
 
-contract SampleBuyPack {
+contract BuyPackContract {
     const minTonsForStorage: Int = ton("0.01");
     const gasConsumption: Int = ton("0.01");
 
-    contract_jettonWallet: Address?;
     owner: Address;
-    content: Cell;
     packages: map<Int, Int>;
     totalBought: Int as coins;
 
-    init(owner: Address, content: Cell) {
+    init(owner: Address) {
         self.owner = owner;
-        self.content = content;
         self.totalBought = 0;
     }
 
-    receive(update: UpdateJettonWallet) {
-        self.contract_jettonWallet = update.contract_jettonWallet;
-    }
 
     receive(pack: CreatePack) {
         let ctx: Context = context();
@@ -73,7 +67,6 @@ contract SampleBuyPack {
         let buyPackId: Int = buyInfo.packId;
         let price: Int = self.packages.get(buyPackId)!!;
 
-        require(self.contract_jettonWallet == null, "used jetton token instead");
         require(price != null, "invalid pack");
         let msgValue: Int = self.msgValue(ctx.value);
         
@@ -98,6 +91,9 @@ contract SampleBuyPack {
     }
 
     receive(withdrawInfo: WithdrawTon) {
+        
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Not owner");
         self.totalBought = self.totalBought - withdrawInfo.amount;
         send(SendParameters{
                 to: self.owner,

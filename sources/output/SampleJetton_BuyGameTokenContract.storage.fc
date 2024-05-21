@@ -1,0 +1,81 @@
+;;
+;; Type: DepositEvent
+;; Header: 0xc89b1d42
+;; TLB: deposit_event#c89b1d42 amountInTon:coins amountInGame:uint256 receiver:address = DepositEvent
+;;
+
+builder $DepositEvent$_store(builder build_0, (int, int, slice) v) inline {
+    var (v'amountInTon, v'amountInGame, v'receiver) = v;
+    build_0 = store_uint(build_0, 3365608770, 32);
+    build_0 = build_0.store_coins(v'amountInTon);
+    build_0 = build_0.store_uint(v'amountInGame, 256);
+    build_0 = __tact_store_address(build_0, v'receiver);
+    return build_0;
+}
+
+cell $DepositEvent$_store_cell((int, int, slice) v) inline {
+    return $DepositEvent$_store(begin_cell(), v).end_cell();
+}
+
+((int, int, slice)) $DepositEvent$_constructor_amountInTon_amountInGame_receiver(int amountInTon, int amountInGame, slice receiver) inline {
+    return (amountInTon, amountInGame, receiver);
+}
+
+;;
+;; Type: DepositInfo
+;; Header: 0xab35b679
+;; TLB: deposit_info#ab35b679 data:^slice signature:^slice = DepositInfo
+;;
+
+(slice, ((slice, slice))) $DepositInfo$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2872424057);
+    var v'data = sc_0~load_ref().begin_parse();
+    var v'signature = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'data, v'signature));
+}
+
+;;
+;; Type: BuyGameTokenContract
+;;
+
+builder $BuyGameTokenContract$_store(builder build_0, (slice, int) v) inline {
+    var (v'owner, v'public_key) = v;
+    build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = build_0.store_int(v'public_key, 257);
+    return build_0;
+}
+
+(slice, ((slice, int))) $BuyGameTokenContract$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'public_key = sc_0~load_int(257);
+    return (sc_0, (v'owner, v'public_key));
+}
+
+(slice, ((slice, int))) $BuyGameTokenContract$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'public_key = sc_0~load_int(257);
+    return (sc_0, (v'owner, v'public_key));
+}
+
+(slice, int) $BuyGameTokenContract$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$BuyGameTokenContract$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (slice owner, int public_key) = $sc~$BuyGameTokenContract$init$_load();
+        $sc.end_parse();
+        return $BuyGameTokenContract$_contract_init(owner, public_key);
+    }
+}
+
+() $BuyGameTokenContract$_contract_store((slice, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $BuyGameTokenContract$_store(b, v);
+    set_data(b.end_cell());
+}

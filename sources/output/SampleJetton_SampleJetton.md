@@ -143,7 +143,6 @@ Argument: owner
 11439: invalid pack
 14534: Not owner
 18668: Can't Mint Anymore
-41385: used jetton token instead
 42708: Invalid sender!
 43422: Invalid value - Burn
 50669: not enough ton

@@ -13,8 +13,8 @@ dotenv.config();
 (async () => {
     //create client for testnet sandboxv4 API - alternative endpoint
     const client4 = new TonClient4({
-        endpoint: "https://sandbox-v4.tonhubapi.com",
-        // endpoint: "https://mainnet-v4.tonhubapi.com",
+        // endpoint: "https://sandbox-v4.tonhubapi.com",
+        endpoint: "https://mainnet-v4.tonhubapi.com",
     });
 
     let mnemonics = (process.env.MNEMONICS || "").toString(); // 🔴 Change to your own, by creating .env file!
@@ -39,35 +39,35 @@ dotenv.config();
     console.log("Deploying contract...... ");
     printSeparator();
 
-    // await deployer_wallet_contract.sendTransfer({
-    //     seqno,
-    //     secretKey,
-    //     messages: [
-    //         internal({to: bridgeAddress, value: toNano('0.1'), init: {code: init.code, data: init.data}, body: null}),
-    //     ]
-    // })
-    
-    let deposit_msg = beginCell().store(
-        storeDepositData({
-            $$type: "DepositData",
-            queryId: 1n,
-            response_destination: deployer_wallet_contract.address,
-            receiver: deployer_wallet_contract.address
-        })
-    )
-    .endCell() 
-    
     await deployer_wallet_contract.sendTransfer({
         seqno,
         secretKey,
         messages: [
-            internal({
-                to: bridgeAddress,
-                value: toNano('0.4'),
-                init: null,
-                body: deposit_msg,
-            }),
-        ],
-    });
+            internal({to: bridgeAddress, value: toNano('0.1'), init: {code: init.code, data: init.data}, body: null}),
+        ]
+    })
+    
+    // let deposit_msg = beginCell().store(
+    //     storeDepositData({
+    //         $$type: "DepositData",
+    //         queryId: 1n,
+    //         response_destination: deployer_wallet_contract.address,
+    //         receiver: deployer_wallet_contract.address
+    //     })
+    // )
+    // .endCell() 
+    
+    // await deployer_wallet_contract.sendTransfer({
+    //     seqno,
+    //     secretKey,
+    //     messages: [
+    //         internal({
+    //             to: bridgeAddress,
+    //             value: toNano('0.1'),
+    //             init: null,
+    //             body: deposit_msg,
+    //         }),
+    //     ],
+    // });
     console.log("====== Deployment message sent to =======\n", bridgeAddress);
 })();

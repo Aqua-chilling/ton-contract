@@ -1,0 +1,126 @@
+#pragma version =0.4.3;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "SampleJetton_BuyGameTokenContract.headers.fc";
+#include "SampleJetton_BuyGameTokenContract.stdlib.fc";
+#include "SampleJetton_BuyGameTokenContract.storage.fc";
+
+;;
+;; Contract BuyGameTokenContract functions
+;;
+
+(slice, int) $BuyGameTokenContract$_contract_init(slice $owner, int $public_key) impure inline_ref {
+    var (($self'owner, $self'public_key)) = (null(), null());
+    $self'owner = $owner;
+    $self'public_key = $public_key;
+    return ($self'owner, $self'public_key);
+}
+
+((slice, int), int) $BuyGameTokenContract$_fun_msg_value((slice, int) $self, int $value) impure inline_ref {
+    var (($self'owner, $self'public_key)) = $self;
+    int $msg_value = $value;
+    int $ton_balance_before_msg = (__tact_my_balance() - $msg_value);
+    int $storage_fee = (10000000 - min($ton_balance_before_msg, 10000000));
+    $msg_value = ($msg_value - ($storage_fee + 10000000));
+    return (($self'owner, $self'public_key), $msg_value);
+}
+
+;;
+;; Receivers of a Contract BuyGameTokenContract
+;;
+
+(((slice, int)), ()) $BuyGameTokenContract$_internal_binary_DepositInfo((slice, int) $self, (slice, slice) $info) impure inline {
+    var ($self'owner, $self'public_key) = $self;
+    var ($info'data, $info'signature) = $info;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    int $msgValue = ($self'owner, $self'public_key)~$BuyGameTokenContract$_fun_msg_value($ctx'value);
+    slice $data = $info'data;
+    int $amountInTon = $data~load_uint(256);
+    int $amountInGame = $data~load_uint(256);
+    slice $signature = $info'signature;
+    slice $sliceHash = $Cell$_fun_asSlice(end_cell(store_uint(store_uint(begin_cell(), $amountInTon, 256), $amountInGame, 256)));
+    throw_unless(55512, ($msgValue >= $amountInTon));
+    int $isValid = check_signature(slice_hash($sliceHash), $signature~load_bits(512), $self'public_key);
+    throw_unless(8120, $isValid);
+    $global_emit($DepositEvent$_store_cell($DepositEvent$_constructor_amountInTon_amountInGame_receiver($amountInTon, $amountInGame, $ctx'sender)));
+    return (($self'owner, $self'public_key), ());
+}
+
+;;
+;; Get methods of a Contract BuyGameTokenContract
+;;
+
+_ %msg_value(int $$value) method_id(72550) {
+    int $value = $$value;
+    var self = $BuyGameTokenContract$_contract_load();
+    var res = self~$BuyGameTokenContract$_fun_msg_value($value);
+    return res;
+}
+
+_ supported_interfaces() method_id {
+    return (
+        "org.ton.introspection.v0"H >> 128,
+        "org.ton.abi.ipfs.v0"H >> 128,
+        "org.ton.deploy.lazy.v0"H >> 128,
+        "org.ton.chain.workchain.v0"H >> 128
+    );
+}
+
+_ get_abi_ipfs() method_id {
+    return "ipfs://QmUHxBtwhmPTQnD7UbeA9ctiZd6UAmJmaKqFKmBbM4dR1z";
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract BuyGameTokenContract
+;;
+
+((slice, int), int) $BuyGameTokenContract$_contract_router_internal((slice, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive DepositInfo message
+    if (op == 2872424057) {
+        var msg = in_msg~$DepositInfo$_load();
+        self~$BuyGameTokenContract$_internal_binary_DepositInfo(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $BuyGameTokenContract$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$BuyGameTokenContract$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $BuyGameTokenContract$_contract_store(self);
+}

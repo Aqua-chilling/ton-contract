@@ -17,8 +17,12 @@ message(0x234ca2d) UpdatePause {
     paused: Bool;
 }
 
+message WithdrawTon {
+    amount: Int as coins;
+}
 
-contract SampleBridgeContract {
+
+contract BridgeContract {
     const minTonsForStorage: Int = ton("0.01");
     const gasConsumption: Int = ton("0.01");
     owner: Address;
@@ -45,6 +49,18 @@ contract SampleBridgeContract {
 
         emit(DepositedEvent{ queryId: info.queryId, amount: msgValue, receiver: info.receiver }.toCell());
     }
+
+    receive(withdrawInfo: WithdrawTon) {
+        send(SendParameters{
+                to: self.owner,
+                value: withdrawInfo.amount,
+                bounce: false,
+                body: null,
+                mode: SendIgnoreErrors
+            }
+        );
+    }
+
 
     get fun msg_value(value: Int): Int {
         let msg_value: Int = value;

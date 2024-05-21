@@ -2,7 +2,7 @@ import { beginCell, contractAddress, toNano, TonClient4, WalletContractV4, inter
 import { mnemonicToPrivateKey } from "ton-crypto";
 import { buildOnchainMetadata } from "./utils/jetton-helpers";
 
-import { SampleBuyPack, storeBuyPack, storeCreatePack, storeUpdateJettonWallet } from "./output/SampleJetton_SampleBuyPack";
+import { BuyPackContract, storeBuyPack, storeCreatePack, storeUpdateJettonWallet } from "./output/SampleJetton_BuyPackContract";
 import { SampleJetton, storeTokenTransfer } from "./output/SampleJetton_SampleJetton";
 
 import { printSeparator } from "./utils/print";
@@ -36,29 +36,11 @@ dotenv.config();
         image: "https://test.aquachilling.com/logo.svg",
     };
 
-    const buypackParams = {
-        name: "Test4 Aqua",
-        description: "Testing Aqua Saler Testing contract",
-        symbol: "Seller",
-        image: "https://test.aquachilling.com/logo.svg",
-    };
-
-    // Create content Cell
-    let content = buildOnchainMetadata(buypackParams);
-
-    let jettonContent = buildOnchainMetadata(jettonParams)
-
     // Compute init data for deployment
     // NOTICE: the parameters inside the init functions were the input for the contract address
     // which means any changes will change the smart contract address as well
-    let init = await SampleBuyPack.init(deployer_wallet_contract.address, content);
+    let init = await BuyPackContract.init(deployer_wallet_contract.address);
     let buyPackAddress = await contractAddress(workchain, init);
-    let jetton_init = await SampleJetton.init(deployer_wallet_contract.address, jettonContent, max_supply);
-    let jettonMaster = await contractAddress(workchain, jetton_init);
-
-    let wallet_init = await JettonDefaultWallet.init(jettonMaster, buyPackAddress);
-    let walletMaster = await contractAddress(workchain, wallet_init);
-    let deployAmount = toNano("0.15");
 
     // send a message on new address contract to deploy it
     let seqno: number = await deployer_wallet_contract.getSeqno();
@@ -73,43 +55,91 @@ dotenv.config();
     console.log("Creating pack::.... ");
     printSeparator();
 
-    let packed_msg = beginCell()
+    let pack0 = beginCell()
+    .store(
+        storeCreatePack({
+            $$type: "CreatePack",
+            packId: 0n,
+            full_price: toNano('0'),
+        })
+    ).endCell()
+
+    let pack1 = beginCell()
     .store(
         storeCreatePack({
             $$type: "CreatePack",
             packId: 1n,
-            full_price: toNano('0.01'),
+            full_price: toNano('0.1'),
         })
     ).endCell()
-    let msg = beginCell().store(storeUpdateJettonWallet({
-        $$type: "UpdateJettonWallet",
-        contract_jettonWallet: walletMaster
-    }))
-    .endCell();
 
+    let pack2 = beginCell()
+    .store(
+        storeCreatePack({
+            $$type: "CreatePack",
+            packId: 2n,
+            full_price: toNano('0.18'),
+        })
+    ).endCell()
+
+    let pack3 = beginCell()
+    .store(
+        storeCreatePack({
+            $$type: "CreatePack",
+            packId: 3n,
+            full_price: toNano('0.64'),
+        })
+    ).endCell()
+
+    let pack4 = beginCell()
+    .store(
+        storeCreatePack({
+            $$type: "CreatePack",
+            packId: 4n,
+            full_price: toNano('1.99'),
+        })
+    ).endCell()
+
+    let pack5 = beginCell()
+    .store(
+        storeCreatePack({
+            $$type: "CreatePack",
+            packId: 5n,
+            full_price: toNano('3.4'),
+        })
+    ).endCell()
+
+    let pack6 = beginCell()
+    .store(
+        storeCreatePack({
+            $$type: "CreatePack",
+            packId: 6n,
+            full_price: toNano('7.38'),
+        })
+    ).endCell()
     
-    // let custom_msg = beginCell().store(
-    //     storeBuyPack({
-    //         $$type: "BuyPack",
-    //         queryId: 1n,
-    //         packId: 1n,
-    //         response_destination: deployer_wallet_contract.address,
-    //         amount: 3n,
-    //     })
-    // )
-    // .endCell() 
+    let buyPackBody = beginCell().store(
+        storeBuyPack({
+            $$type: "BuyPack",
+            queryId: 1n,
+            packId: 1n,
+            response_destination: deployer_wallet_contract.address,
+            amount: 3n,
+        })
+    )
+    .endCell() 
     
-    // await deployer_wallet_contract.sendTransfer({
-    //     seqno,
-    //     secretKey,
-    //     messages: [
-    //         internal({
-    //             to: buyPackAddress,
-    //             value: toNano('0.1'),
-    //             init: null,
-    //             body: custom_msg,
-    //         }),
-    //     ],
-    // });
-    // console.log("====== Deployment message sent to =======\n", buyPackAddress);
+    await deployer_wallet_contract.sendTransfer({
+        seqno,
+        secretKey,
+        messages: [
+            internal({
+                to: buyPackAddress,
+                value: toNano('1'),
+                init: null,
+                body: buyPackBody,
+            }),
+        ],
+    });
+    console.log("====== Deployment message sent to =======\n", buyPackAddress);
 })();
