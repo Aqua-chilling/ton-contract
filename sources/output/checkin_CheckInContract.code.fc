@@ -1,0 +1,106 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "checkin_CheckInContract.headers.fc";
+#include "checkin_CheckInContract.stdlib.fc";
+#include "checkin_CheckInContract.storage.fc";
+
+;;
+;; Contract CheckInContract functions
+;;
+
+(slice, int, int) $CheckInContract$_contract_init(slice $owner) impure inline_ref {
+    var (($self'owner, $self'fee, $self'reward)) = (null(), null(), null());
+    $self'owner = $owner;
+    $self'fee = 800000000;
+    $self'reward = 460000000;
+    return ($self'owner, $self'fee, $self'reward);
+}
+
+((slice, int, int), int) $CheckInContract$_fun_msg_value((slice, int, int) $self, int $value) impure inline_ref {
+    var (($self'owner, $self'fee, $self'reward)) = $self;
+    int $msg_value = $value;
+    int $ton_balance_before_msg = (__tact_my_balance() - $msg_value);
+    int $storage_fee = (20000000 - min($ton_balance_before_msg, 20000000));
+    $msg_value = ($msg_value - ($storage_fee + 20000000));
+    return (($self'owner, $self'fee, $self'reward), $msg_value);
+}
+
+;;
+;; Receivers of a Contract CheckInContract
+;;
+
+(((slice, int, int)), ()) $CheckInContract$_internal_binary_WithdrawTon((slice, int, int) $self, (int) $withdrawInfo) impure inline {
+    var ($self'owner, $self'fee, $self'reward) = $self;
+    var ($withdrawInfo'amount) = $withdrawInfo;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(14534, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
+    $global_send($SendParameters$_constructor_to_value_bounce_body_mode($self'owner, $withdrawInfo'amount, false, null(), 2));
+    return (($self'owner, $self'fee, $self'reward), ());
+}
+
+;;
+;; Get methods of a Contract CheckInContract
+;;
+
+_ %msg_value(int $value) method_id(72550) {
+    int $value = $value;
+    var self = $CheckInContract$_contract_load();
+    var res = self~$CheckInContract$_fun_msg_value($value);
+    return res;
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract CheckInContract
+;;
+
+((slice, int, int), int) $CheckInContract$_contract_router_internal((slice, int, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive WithdrawTon message
+    if (op == 4206811366) {
+        var msg = in_msg~$WithdrawTon$_load();
+        self~$CheckInContract$_internal_binary_WithdrawTon(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $CheckInContract$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$CheckInContract$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $CheckInContract$_contract_store(self);
+}
