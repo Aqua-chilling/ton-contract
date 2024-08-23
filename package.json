@@ -7,6 +7,7 @@
     "deploy-jetton": "ts-node ./sources/jetton.deploy.ts",
     "deploy-claim": "ts-node ./sources/claim.deploy.ts",
     "deploy-bridge": "ts-node ./sources/bridge.deploy.ts",
+    "transfer": "ts-node ./sources/1_Transfer.ts",
     "read": "ts-node ./sources/contract.read.ts",
     "d1": "ts-node ./sources/1_Transfer.ts",
     "d2": "ts-node ./sources/2_TransferURL.ts",

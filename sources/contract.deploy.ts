@@ -2,7 +2,7 @@ import { beginCell, contractAddress, toNano, TonClient4, WalletContractV4, inter
 import { mnemonicToPrivateKey } from "ton-crypto";
 import { buildOnchainMetadata } from "./utils/jetton-helpers";
 
-import { BuyPackContract, storeBuyPack, storeCreatePack, storeUpdateJettonWallet } from "./output/SampleJetton_BuyPackContract";
+import { BuyPackContract, storeBuyPack, storeCreatePack, storeUpdateJettonWallet, storeWithdrawTon } from "./output/SampleJetton_BuyPackContract";
 import { SampleJetton, storeTokenTransfer } from "./output/SampleJetton_SampleJetton";
 
 import { printSeparator } from "./utils/print";
@@ -69,7 +69,7 @@ dotenv.config();
         storeCreatePack({
             $$type: "CreatePack",
             packId: 1n,
-            full_price: toNano('0.1'),
+            full_price: toNano('1'),
         })
     ).endCell()
 
@@ -78,7 +78,7 @@ dotenv.config();
         storeCreatePack({
             $$type: "CreatePack",
             packId: 2n,
-            full_price: toNano('0.18'),
+            full_price: toNano('1.8'),
         })
     ).endCell()
 
@@ -87,7 +87,7 @@ dotenv.config();
         storeCreatePack({
             $$type: "CreatePack",
             packId: 3n,
-            full_price: toNano('0.64'),
+            full_price: toNano('6.4'),
         })
     ).endCell()
 
@@ -96,7 +96,7 @@ dotenv.config();
         storeCreatePack({
             $$type: "CreatePack",
             packId: 4n,
-            full_price: toNano('1.99'),
+            full_price: toNano('19.9'),
         })
     ).endCell()
 
@@ -105,7 +105,7 @@ dotenv.config();
         storeCreatePack({
             $$type: "CreatePack",
             packId: 5n,
-            full_price: toNano('3.4'),
+            full_price: toNano('34'),
         })
     ).endCell()
 
@@ -114,20 +114,34 @@ dotenv.config();
         storeCreatePack({
             $$type: "CreatePack",
             packId: 6n,
-            full_price: toNano('7.38'),
+            full_price: toNano('73.8'),
+        })
+    ).endCell()
+
+    let pack7 = beginCell()
+    .store(
+        storeCreatePack({
+            $$type: "CreatePack",
+            packId: 7n,
+            full_price: toNano('0.1'),
         })
     ).endCell()
     
     let buyPackBody = beginCell().store(
         storeBuyPack({
             $$type: "BuyPack",
-            queryId: 1n,
-            packId: 1n,
+            queryId: 7n,
+            packId: 7n,
             response_destination: deployer_wallet_contract.address,
-            amount: 3n,
+            amount: 1n,
         })
     )
     .endCell() 
+
+    let withdrawBody = beginCell().store(storeWithdrawTon({
+        $$type: "WithdrawTon",
+        amount: toNano('0.9'),
+    })).endCell()
     
     await deployer_wallet_contract.sendTransfer({
         seqno,
@@ -135,7 +149,7 @@ dotenv.config();
         messages: [
             internal({
                 to: buyPackAddress,
-                value: toNano('1'),
+                value: toNano('0.12'),
                 init: null,
                 body: buyPackBody,
             }),

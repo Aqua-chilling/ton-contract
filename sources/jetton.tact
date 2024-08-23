@@ -6,7 +6,7 @@ message Mint {
     receiver: Address;
 }
 
-contract SampleJetton with Jetton {
+contract AquaJetton with Jetton {
     totalSupply: Int as coins;
     owner: Address;
     content: Cell;

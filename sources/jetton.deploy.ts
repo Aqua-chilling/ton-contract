@@ -1,8 +1,8 @@
 import { beginCell, contractAddress, toNano, TonClient4, WalletContractV4, internal, fromNano, Address, external } from "@ton/ton";
 import { mnemonicToPrivateKey } from "ton-crypto";
 import { buildOnchainMetadata } from "./utils/jetton-helpers";
-import {SampleJetton, storeMint} from './output/SampleJetton_SampleJetton'
-import { JettonDefaultWallet, storeTokenTransfer } from './output/SampleJetton_JettonDefaultWallet'
+import {SampleJetton, storeMint, storeTokenTransferInternal} from './output/SampleJetton_SampleJetton'
+import { JettonDefaultWallet, storeTokenTransfer } from './output/AquaJetton_JettonDefaultWallet'
 import { SampleBuyPack } from './output/SampleJetton_SampleBuyPack'
 
 
@@ -27,23 +27,16 @@ dotenv.config();
     let deployer_wallet_contract = client4.open(deployer_wallet);
 
     const jettonParams = {
-        name: "Test2 Aqua",
-        description: "Testing Aqua Token",
-        symbol: "AQUA",
-        image: "https://test.aquachilling.com/logo.svg",
+        name: "Test Ton farm",
+        description: "Test Ton farm",
+        symbol: "TTT",
+        image: "https://aquachilling.com/logo.svg",
     };
 
-    const buypackParams = {
-        name: "Test2 Aqua Saler",
-        description: "Testing Aqua Saler Testing contract",
-        symbol: "Seller",
-        image: "https://test.aquachilling.com/logo.svg",
-    };
-    const buypackContent = buildOnchainMetadata(buypackParams);
-
+    
     // Create content Cell
     let content = buildOnchainMetadata(jettonParams);
-    let max_supply = toNano(123456766689011); // 🔴 Set the specific total supply in nano
+    let max_supply = toNano(1_000_000_000); // 🔴 Set the specific total supply in nano
 
     // Compute init data for deployment
     // NOTICE: the parameters inside the init functions were the input for the contract address
@@ -51,43 +44,14 @@ dotenv.config();
     let init = await SampleJetton.init(deployer_wallet_contract.address, content, max_supply);
     let jettonMaster = contractAddress(workchain, init);
 
-    let wallet_init = await JettonDefaultWallet.init(jettonMaster, deployer_wallet_contract.address);
+    let wallet_init = await JettonDefaultWallet.init(jettonMaster, Address.parse('EQA5Cj_BSGgwLsIaqPFQRh5gmiNjFg5TH21taTzFvYouXlPx'));
     let walletMaster = await contractAddress(workchain, wallet_init);
-    let buypackInit = await SampleBuyPack.init(deployer_wallet_contract.address, buypackContent);
-    let buyPackAddress = await contractAddress(workchain, buypackInit);
+
+    let wallet_init1 = await JettonDefaultWallet.init(jettonMaster, deployer_wallet_contract.address);
+    let walletMaster1 = await contractAddress(workchain, wallet_init1);
     let deployAmount = toNano("0.5");
 
-    let supply = toNano(1000000000); // 🔴 Specify total supply in nano
-    let packed_msg = beginCell()
-        .store(
-            storeMint({
-                $$type: "Mint",
-                amount: supply,
-                receiver: deployer_wallet_contract.address,
-            })
-        )
-        .endCell();
-        const test_message_left = beginCell()
-            .storeUint(1, 8)
-            .endCell();
-        const test = test_message_left.asSlice().loadUint(8);
-        console.log('payload', test_message_left);
-        console.log('testing', test)
-
-    let packed = beginCell()
-        .store(
-            storeTokenTransfer({
-                $$type: "TokenTransfer",
-                queryId: 0n,
-                amount: toNano(100),
-                destination: buyPackAddress,
-                response_destination: deployer_wallet_contract.address, // Original Owner, aka. First Minter's Jetton Wallet
-                custom_payload: null,
-                forward_ton_amount: toNano("0.2"),
-                forward_payload: test_message_left,
-            })
-        )
-        .endCell();
+    
 
     // send a message on new address contract to deploy it
     let seqno: number = await deployer_wallet_contract.getSeqno();
@@ -99,26 +63,33 @@ dotenv.config();
     let balance: bigint = await deployer_wallet_contract.getBalance();
 
     console.log("Current deployment wallet balance = ", fromNano(balance).toString(), "💎TON");
-    console.log("Minting:: ", fromNano(supply));
     printSeparator();
 
-    console.log('master:: ', jettonMaster)
+    console.log('master:: ', jettonMaster);
 
-    await deployer_wallet_contract.sendTransfer({
-        seqno,
-        secretKey,
-        messages: [
-            internal({
-                to: jettonMaster,
-                value: deployAmount,
-                init: {
-                    code: init.code,
-                    data: init.data,
-                },
-                body: packed_msg,
-            }),
-        ],
-    });
+    let mint = beginCell()
+    .store(
+        storeMint({
+            $$type: "Mint",
+            receiver: deployer_wallet.address,
+            amount: toNano(1_000_000_000)
+        })
+    ).endCell()
+
+    let forward_string_test = beginCell().storeAddress(deployer_wallet.address).endCell();
+
+    // await deployer_wallet_contract.sendTransfer({
+    //     seqno,
+    //     secretKey,
+    //     messages: [
+    //         internal({
+    //             to: Address.parse('kQBMKgc9da6lUPQEvO_PHVBtIBXNpORMzqEy77TtXOumHe9T'),
+    //             value: deployAmount,
+    //             init: null,
+    //             body: null,
+    //         }),
+    //     ],
+    // });
     // await deployer_wallet_contract.sendTransfer({
     //     seqno,
     //     secretKey,
@@ -132,5 +103,5 @@ dotenv.config();
     //         }),
     //     ],
     // });
-    console.log("====== Deployment message sent to =======\n", jettonMaster);
+    console.log("====== Deployment message sent to =======\n", jettonMaster, walletMaster, walletMaster1);
 })();

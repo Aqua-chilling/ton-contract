@@ -1,5 +1,11 @@
 {
     "projects": [{
+        "name": "AquaJetton",
+        "path": "./sources/jetton.tact",
+        "output": "./sources/output",
+        "options":{
+        }
+    }, {
         "name": "SampleClaim",
         "path": "./sources/claim.tact",
         "output": "./sources/output",

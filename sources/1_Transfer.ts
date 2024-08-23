@@ -1,4 +1,4 @@
-import { Address, beginCell, contractAddress, toNano, TonClient4, internal, fromNano, WalletContractV4 } from "ton";
+import { Address, beginCell, contractAddress, toNano, TonClient4, internal, fromNano, WalletContractV4 } from "@ton/ton";
 import { deploy } from "./utils/deploy";
 import { printAddress, printDeploy, printHeader, printSeparator } from "./utils/print";
 import { buildOnchainMetadata } from "./utils/jetton-helpers";
@@ -9,7 +9,7 @@ dotenv.config();
 import { SampleJetton, storeTokenTransfer } from "./output/SampleJetton_SampleJetton";
 // ========================================
 
-let NewOnwer_Address = Address.parse(""); // 🔴 Owner should usually be the deploying wallet's address.
+let NewOnwer_Address = Address.parse("EQAIdOyxy1lXV_aCNujQsTNMAWSLfWYoV0Tx1PGWXiaQJoAK"); // 🔴 Owner should usually be the deploying wallet's address.
 
 (async () => {
     const client4 = new TonClient4({
@@ -17,7 +17,7 @@ let NewOnwer_Address = Address.parse(""); // 🔴 Owner should usually be the de
         endpoint: "https://sandbox-v4.tonhubapi.com",
     });
 
-    let mnemonics = (process.env.mnemonics || "").toString(); // 🔴 Change to your own, by creating .env file!
+    let mnemonics = (process.env.MNEMONICS || "").toString(); // 🔴 Change to your own, by creating .env file!
     let keyPair = await mnemonicToPrivateKey(mnemonics.split(" "));
     let secretKey = keyPair.secretKey;
     let workchain = 0;
@@ -28,15 +28,15 @@ let NewOnwer_Address = Address.parse(""); // 🔴 Owner should usually be the de
 
     let wallet_contract = client4.open(wallet);
     const jettonParams = {
-        name: "Test Token Name",
-        description: "This is description of Test Jetton Token in Tact-lang",
-        symbol: "TTN",
-        image: "https://avatars.githubusercontent.com/u/104382459?s=200&v=4",
+        name: "Test Ton farm",
+        description: "Test Ton farm",
+        symbol: "TTT",
+        image: "https://aquachilling.com/logo.svg",
     };
 
     // Create content Cell
     let content = buildOnchainMetadata(jettonParams);
-    let max_supply = toNano("666.123456789"); // 🔴 Set the specific total supply in nano
+    let max_supply = toNano(1_000_000_000);// 🔴 Set the specific total supply in nano
 
     // Compute init data for deployment
     // NOTICE: the parameters inside the init functions were the input for the contract address
@@ -46,13 +46,14 @@ let NewOnwer_Address = Address.parse(""); // 🔴 Owner should usually be the de
     let contract_dataFormat = SampleJetton.fromAddress(jetton_masterWallet);
     let contract = client4.open(contract_dataFormat);
     let jetton_wallet = await contract.getGetWalletAddress(wallet_contract.address);
+    let jetton_wallet1 = await contract.getGetWalletAddress(Address.parse('EQAIdOyxy1lXV_aCNujQsTNMAWSLfWYoV0Tx1PGWXiaQJoAK'));
     console.log("✨ " + wallet_contract.address + "'s JettonWallet ==> ");
 
     // ✨Pack the forward message into a cell
     const test_message_left = beginCell()
         .storeBit(0) // 🔴  whether you want to store the forward payload in the same cell or not. 0 means no, 1 means yes.
         .storeUint(0, 32)
-        .storeBuffer(Buffer.from("Hello, GM -- Left.", "utf-8"))
+        .storeAddress(wallet_contract.address)
         .endCell();
 
     // const test_message_right = beginCell()
@@ -66,12 +67,12 @@ let NewOnwer_Address = Address.parse(""); // 🔴 Owner should usually be the de
         .store(
             storeTokenTransfer({
                 $$type: "TokenTransfer",
-                query_id: 0n,
-                amount: toNano(20000),
+                queryId: 0n,
+                amount: toNano(10),
                 destination: NewOnwer_Address,
                 response_destination: wallet_contract.address, // Original Owner, aka. First Minter's Jetton Wallet
-                custom_payload: forward_string_test,
-                forward_ton_amount: toNano("0.000000001"),
+                custom_payload: null,
+                forward_ton_amount: toNano("0.01"),
                 forward_payload: test_message_left,
             })
         )
@@ -100,4 +101,5 @@ let NewOnwer_Address = Address.parse(""); // 🔴 Owner should usually be the de
             }),
         ],
     });
+    console.log('jetton_wallet1: ', jetton_wallet1)
 })();
